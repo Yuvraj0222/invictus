@@ -81,7 +81,7 @@ function App() {
   const settlements = useMemo(function () { return createSettlements(data.people, balances); }, [data.people, balances]);
   const totalPaid = filteredExpenses.reduce(function (sum, expense) { return sum + expense.amountCents; }, 0);
   const totalShared = filteredExpenses.reduce(function (sum, expense) { return sum + expense.participants.reduce(function (inner, share) { return inner + share.cents; }, 0); }, 0);
-  const hasFilters = filters.search || filters.personId !== 'all' || filters.category !== 'all;
+  const hasFilters = filters.search || filters.personId !== 'all' || filters.category !== 'all';
   function openNewExpense() { setEditingId(null); setForm(emptyForm(data.people)); setErrors([]); setShowExpenseForm(true); }
   function openEditExpense(expense) { const percentages = {}; expense.participants.forEach(function (share) { if (share.percentageBps !== undefined) percentages[share.personId] = (share.percentageBps / 100).toFixed(2).replace(/\\.00$/, ''); }); setEditingId(expense.id); setForm({ description: expense.description, amount: formatInputAmount(expense.amountCents), payerId: expense.payerId, participantIds: expense.participants.map(function (share) { return share.personId; }), splitType: expense.splitType || 'equal', percentages: percentages, category: expense.category || 'Other' }); setErrors([]); setShowExpenseForm(true); }
   function closeExpenseForm() { setShowExpenseForm(false); setEditingId(null); setErrors([]); }
