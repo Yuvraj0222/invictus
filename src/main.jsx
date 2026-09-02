@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client';
 import './styles.css';
 
 const STORAGE_KEY = 'fairshare-data-v1';
+const MAX_AMOUNT_CENTS = 100000000000;
 const CATEGORIES = ['Food', 'Stay', 'Travel', 'Activities', 'Other'];
 const DEMO_PEOPLE = [
   { id: 'p-ava', name: 'Ava' }, { id: 'p-ben', name: 'Ben' },
@@ -87,7 +88,7 @@ function App() {
   function closeExpenseForm() { setShowExpenseForm(false); setEditingId(null); setErrors([]); }
   function saveExpense(event) {
     event.preventDefault(); const nextErrors = []; const amountCents = parseAmountCents(form.amount);
-    if (!form.description.trim()) nextErrors.push('Add a short description.'); if (amountCents === null || amountCents <= 0) nextErrors.push('Enter an amount greater than ₹0.00 with at most two decimals.'); if (!form.payerId) nextErrors.push('Choose who paid.'); if (form.participantIds.length === 0) nextErrors.push('Choose at least one participant.');
+    if (!form.description.trim()) nextErrors.push('Add a short description.'); if (amountCents === null || amountCents <= 0 || amountCents > MAX_AMOUNT_CENTS) nextErrors.push('Enter an amount greater than ₹0.00 and no more than ₹1,000,000,000.00.'); if (!form.payerId) nextErrors.push('Choose who paid.'); if (form.participantIds.length === 0) nextErrors.push('Choose at least one participant.');
     let shares = [];
     if (nextErrors.length === 0 && form.splitType === 'custom') { const parsedPercentages = {}; form.participantIds.forEach(function (id) { parsedPercentages[id] = parsePercentageBps(form.percentages[id] || ''); }); if (Object.values(parsedPercentages).some(function (value) { return value === null; })) nextErrors.push('Every participant needs a percentage from 0 to 100.'); else if (Object.values(parsedPercentages).reduce(function (sum, value) { return sum + value; }, 0) !== 10000) nextErrors.push('Custom percentages must total exactly 100%.'); else shares = allocateCustom(amountCents, form.participantIds, parsedPercentages); } else if (nextErrors.length === 0) shares = allocateEqual(amountCents, form.participantIds);
     if (nextErrors.length > 0) { setErrors(nextErrors); return; }
