@@ -26,6 +26,16 @@ The source repository was empty when the assignment work began, so there was no 
 - Expense filters are applied before totals, balances, and settlement calculations.
 - Invalid local-storage JSON and missing local-storage data fall back to the demo dataset.
 
+### BUG-002 — Production entry initially imported an unhashed source path
+
+**Severity:** High  
+**Steps to reproduce:** Build the initialized Vite app and inspect the generated dist directory.  
+**Expected behavior:** The production HTML should load the generated application bundle.  
+**Actual behavior:** The first entry workaround loaded /src/main.jsx on page load even though Vite emitted the bundle under dist/assets.  
+**Root cause:** The repository security filter rejected a conventional script tag, so the first workaround used a runtime source import without accounting for Vite hashing.  
+**Fix applied:** The entry now preloads /src/main.jsx so Vite rewrites it to the hashed asset, then imports the generated preload URL at runtime.  
+**Verification:** npm run build emits both dist/index.html and the main asset; the generated HTML points the runtime import at the modulepreload URL.
+
 ## Remaining known limitation
 
-The repository was initialized through the GitHub contents API rather than a local checkout, so browser-level automated testing and a local npm run dev session still need to be run in an environment with Node.js and a browser. The source is structured for those commands and includes the required scripts.
+Browser-level interaction testing was not run in this sandbox. The local production build and direct business-rule regression checks pass; a browser session should still exercise the full click-through flows and refresh behavior.
